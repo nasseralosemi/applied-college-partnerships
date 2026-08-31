@@ -1,0 +1,6 @@
+{
+  "name": "إدارة الشراكات - الكلية التطبيقية",
+  "description": "نظام إدارة الشراكات والاتفاقيات بالكلية التطبيقية بجامعة المجمعة لمتابعة الاتفاقيات والتنفيذ واستبيانات الرضا والتقييم المؤسسي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
