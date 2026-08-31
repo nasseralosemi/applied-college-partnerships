@@ -339,15 +339,15 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
         <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
           
           {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               id="search-agreements"
               placeholder="ابحث باسم الشريك، الرقم التعريفي، المدينة، أو مجال التعاون..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white text-slate-900 text-xs sm:text-sm pr-10 pl-4 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+              className="w-full bg-white text-slate-900 text-xs sm:text-sm pr-10 pl-9 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
             />
             {searchTerm && (
               <button
@@ -360,16 +360,16 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
           </div>
 
           {/* Filters & Actions */}
-          <div className="flex items-center flex-wrap gap-2.5">
+          <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 sm:gap-2.5 w-full lg:w-auto">
             
             {/* Sector Filter */}
-            <div className="flex items-center gap-1 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-bold text-slate-500">القطاع:</span>
+            <div className="flex-1 sm:flex-none flex items-center justify-between sm:justify-start gap-1 bg-white px-2.5 py-2 sm:py-1.5 rounded-xl border border-slate-200 shadow-2xs min-w-[120px]">
+              <span className="text-[11px] font-bold text-slate-500 shrink-0">القطاع:</span>
               <select
                 id="filter-sector"
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer w-full"
               >
                 <option value="ALL">الكل</option>
                 {SECTOR_OPTIONS.map(s => (
@@ -379,13 +379,13 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
             </div>
 
             {/* Status Filter */}
-            <div className="flex items-center gap-1 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-bold text-slate-500">الحالة:</span>
+            <div className="flex-1 sm:flex-none flex items-center justify-between sm:justify-start gap-1 bg-white px-2.5 py-2 sm:py-1.5 rounded-xl border border-slate-200 shadow-2xs min-w-[120px]">
+              <span className="text-[11px] font-bold text-slate-500 shrink-0">الحالة:</span>
               <select
                 id="filter-status"
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer w-full"
               >
                 <option value="ALL">الكل</option>
                 {STATUS_OPTIONS.map(s => (
@@ -395,7 +395,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
             </div>
 
             {/* View Mode Toggle */}
-            <div className="hidden sm:flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-300/70">
+            <div className="hidden sm:flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-300/70 shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-all cursor-pointer ${
@@ -420,9 +420,9 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
             <button
               onClick={handleOpenAdd}
               id="btn-add-new-agreement"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 shrink-0" />
               <span>إضافة اتفاقية جديدة</span>
             </button>
 
@@ -652,8 +652,8 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
                     <span className="whitespace-nowrap">استعراض البيانات بالكامل</span>
                   </button>
 
-                  {/* Secondary Action Buttons (Hidden by default, smooth animated appearance on card hover) */}
-                  <div className="flex items-center gap-1.5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto max-w-0 group-hover:max-w-[150px] overflow-hidden transition-all duration-300 ease-in-out">
+                  {/* Secondary Action Buttons (Visible on mobile/tablet, animated on desktop hover) */}
+                  <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto max-w-full sm:max-w-0 sm:group-hover:max-w-[150px] overflow-hidden transition-all duration-300 ease-in-out shrink-0">
                     {/* PDF Preview Button */}
                     <button
                       type="button"
