@@ -301,32 +301,33 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
     }
   };
 
-  // Status Badge Helper
+  // Status Badge Helper - Vibrant Pastel Badges
   const getStatusBadge = (status: AgreementStatus) => {
     switch (status) {
       case 'سارية':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><CheckCircle className="w-3 h-3 text-emerald-600" /> سارية</span>;
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-800 border border-emerald-400/60 shadow-2xs"><CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> سارية</span>;
       case 'جديدة':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300"><Sparkles className="w-3 h-3 text-sky-600" /> جديدة</span>;
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500/15 text-sky-800 border border-sky-400/60 shadow-2xs"><Sparkles className="w-3.5 h-3.5 text-sky-600" /> جديدة</span>;
       case 'منتهية':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300"><AlertCircle className="w-3 h-3 text-rose-600" /> منتهية</span>;
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-800 border border-rose-400/60 shadow-2xs"><AlertCircle className="w-3.5 h-3.5 text-rose-600" /> منتهية</span>;
       case 'قيد التجديد':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300"><Clock className="w-3 h-3 text-amber-600" /> قيد التجديد</span>;
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-900 border border-amber-400/60 shadow-2xs"><Clock className="w-3.5 h-3.5 text-amber-600" /> قيد التجديد</span>;
       case 'قيد التوقيع':
-        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-violet-100 text-violet-800 border border-violet-300"><Clock className="w-3 h-3 text-violet-600" /> قيد التوقيع (قادمة)</span>;
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-900 border border-purple-400/60 shadow-2xs"><Clock className="w-3.5 h-3.5 text-purple-600" /> قيد التوقيع</span>;
     }
   };
 
+  // Sector Badge Helper - Vibrant Pastel Badges
   const getSectorBadge = (sector: SectorType) => {
     switch (sector) {
       case 'حكومي':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">قطاع حكومي</span>;
+        return <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs">قطاع حكومي</span>;
       case 'خاص':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200">قطاع خاص</span>;
+        return <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-300 shadow-2xs">قطاع خاص</span>;
       case 'شبه حكومي':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-100 text-teal-800 border border-teal-200">شبه حكومي</span>;
+        return <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-300 shadow-2xs">شبه حكومي</span>;
       case 'غير ربحي':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">غير ربحي</span>;
+        return <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">غير ربحي</span>;
     }
   };
 
@@ -442,7 +443,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
 
       {/* Grid View */}
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
           {filteredAgreements.map((agr) => {
             const isSelected = selectedAgreementId === agr.id;
             const metrics = agreementMetricsMap.get(agr.id) || {
@@ -467,185 +468,224 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
               setViewingAgreement(agr);
             };
 
+            // Limit domain tags to max 3 with +X more badge
+            const maxDomainsToShow = 3;
+            const visibleDomains = agr.domains.slice(0, maxDomainsToShow);
+            const extraDomainsCount = agr.domains.length - maxDomainsToShow;
+
             return (
               <div
                 key={agr.id}
                 id={`card-agreement-${agr.id}`}
                 onClick={() => onSelectAgreement(agr)}
-                className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer ${
+                className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col justify-between h-full cursor-pointer hover:-translate-y-1 ${
                   isSelected
-                    ? 'border-emerald-600 ring-2 ring-emerald-500/30 shadow-lg bg-emerald-50/20'
-                    : 'border-slate-200/90 hover:border-emerald-300 hover:shadow-md'
+                    ? 'border-emerald-500 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10 bg-emerald-50/20'
+                    : 'border-slate-200/90 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-600/10'
                 }`}
               >
-                {/* Card Top */}
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div>
-                      <span className="font-mono text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                        {agr.id}
-                      </span>
-                      <h4 className="text-base font-bold text-slate-900 mt-1.5 leading-snug">
-                        {agr.partnerName}
-                      </h4>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        {agr.agreementType}
-                      </p>
+                {/* Vibrant Dynamic Accent Top Bar */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-sky-500 opacity-90 group-hover:opacity-100 transition-opacity" />
+
+                {/* Card Top & Body (flex-1 so bottom is pushed down evenly) */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-slate-500 bg-slate-100/90 border border-slate-200/80 px-2 py-0.5 rounded-md">
+                          {agr.id}
+                        </span>
+                        <h4 className="text-base font-bold text-slate-900 mt-1.5 leading-snug line-clamp-2 group-hover:text-emerald-950 transition-colors" title={agr.partnerName}>
+                          {agr.partnerName}
+                        </h4>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          {agr.agreementType}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        {getStatusBadge(agr.status)}
+                        {getSectorBadge(agr.sector)}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      {getStatusBadge(agr.status)}
-                      {getSectorBadge(agr.sector)}
+
+                    {/* Domains Tags (Vibrant Pastel Tags constrained to max 3 with +X more badge) */}
+                    <div className="flex flex-wrap items-center gap-1.5 my-3.5 min-h-[30px]">
+                      {visibleDomains.map((dom, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-0.5 rounded-lg bg-teal-50/80 text-teal-800 text-[11px] font-semibold border border-teal-200/80 truncate max-w-[170px] shadow-2xs"
+                          title={dom}
+                        >
+                          {dom}
+                        </span>
+                      ))}
+                      {extraDomainsCount > 0 && (
+                        <span 
+                          className="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-800 text-[11px] font-bold border border-emerald-300 shadow-2xs cursor-help"
+                          title={agr.domains.slice(maxDomainsToShow).join('، ')}
+                        >
+                          +{extraDomainsCount} أكثر
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Dates & Location */}
+                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50/80 p-3 rounded-xl border border-slate-100 mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <div>
+                          <div className="text-[10px] text-slate-400">التوقيع:</div>
+                          <span className="font-semibold">{agr.signDate}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <div>
+                          <div className="text-[10px] text-slate-400">الانتهاء:</div>
+                          <span className="font-semibold">{agr.expiryDate}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 col-span-2 mt-1 pt-1 border-t border-slate-200/60">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-slate-700 font-medium truncate">المقر: {agr.city}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Domains Tags */}
-                  <div className="flex flex-wrap gap-1.5 my-3.5">
-                    {agr.domains.map((dom, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200/60"
+                  {/* Bottom section of the body: Progress bars & Sub-indicator badges */}
+                  <div>
+                    {/* Live Execution Progress Bars (Prominent Beneficiary Metrics) */}
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      
+                      {/* Training Progress */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-amber-800 flex items-center gap-1">
+                            <GraduationCap className="w-3.5 h-3.5 text-amber-600" />
+                            مستفيدي التدريب:
+                          </span>
+                          <span className="font-mono text-slate-700">
+                            <strong>{metrics.executedTraining}</strong> / {agr.targetTrainingCount} ({trainingPct}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                            style={{ width: `${trainingPct}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Employment Progress */}
+                      <div>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className="text-purple-800 flex items-center gap-1">
+                            <Briefcase className="w-3.5 h-3.5 text-purple-600" />
+                            مستفيدي التوظيف:
+                          </span>
+                          <span className="font-mono text-slate-700">
+                            <strong>{metrics.executedEmployment}</strong> / {agr.targetEmploymentCount} ({employmentPct}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                            style={{ width: `${employmentPct}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Connected Summary Badges (Enlarged, Styled, and Color-Coded) */}
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1.5 select-none cursor-default"
+                    >
+                      {/* Executions Badge */}
+                      <div 
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-xs font-bold shadow-2xs transition-colors"
+                        title={`${metrics.executionsCount} عملية تنفيذ مسجلة`}
                       >
-                        {dom}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Dates & Location */}
-                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50/80 p-3 rounded-xl border border-slate-100 mb-4">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <div>
-                        <div className="text-[10px] text-slate-400">التوقيع:</div>
-                        <span className="font-semibold">{agr.signDate}</span>
+                        <Activity className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">{metrics.executionsCount} تنفيذ</span>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <div>
-                        <div className="text-[10px] text-slate-400">الانتهاء:</div>
-                        <span className="font-semibold">{agr.expiryDate}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 col-span-2 mt-1 pt-1 border-t border-slate-200/60">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-slate-700 font-medium">المقر: {agr.city}</span>
-                    </div>
-                  </div>
 
-                  {/* Live Execution Progress Bars */}
-                  <div className="space-y-3 pt-2 border-t border-slate-100">
-                    
-                    {/* Training Progress */}
-                    <div>
-                      <div className="flex justify-between text-xs font-semibold mb-1">
-                        <span className="text-amber-800 flex items-center gap-1">
-                          <GraduationCap className="w-3.5 h-3.5 text-amber-600" />
-                          مستفيدي التدريب:
-                        </span>
-                        <span className="font-mono text-slate-700">
-                          <strong>{metrics.executedTraining}</strong> / {agr.targetTrainingCount} ({trainingPct}%)
+                      {/* Surveys Badge */}
+                      <div 
+                        className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200/90 text-xs font-bold shadow-2xs transition-colors"
+                        title={`${metrics.surveysCount} استبيان رضا`}
+                      >
+                        <Smile className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span className="truncate">{metrics.surveysCount} استبيان</span>
+                      </div>
+
+                      {/* Evaluation Badge */}
+                      <div 
+                        className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border text-xs font-bold shadow-2xs transition-colors ${
+                          metrics.evaluationsCount > 0
+                            ? 'bg-amber-50 text-amber-900 border-amber-300'
+                            : 'bg-amber-50/50 text-amber-800 border-amber-200/80'
+                        }`}
+                        title={metrics.evaluationsCount > 0 ? `متوسط التقييم المؤسسي: ${metrics.avgEvalScore}%` : 'حالة التقييم: غير مقيم حتى الآن'}
+                      >
+                        <Award className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="truncate">
+                          {metrics.evaluationsCount > 0 ? `${metrics.avgEvalScore}% تقييم` : 'غير مقيم'}
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                          style={{ width: `${trainingPct}%` }}
-                        ></div>
-                      </div>
                     </div>
-
-                    {/* Employment Progress */}
-                    <div>
-                      <div className="flex justify-between text-xs font-semibold mb-1">
-                        <span className="text-purple-800 flex items-center gap-1">
-                          <Briefcase className="w-3.5 h-3.5 text-purple-600" />
-                          مستفيدي التوظيف:
-                        </span>
-                        <span className="font-mono text-slate-700">
-                          <strong>{metrics.executedEmployment}</strong> / {agr.targetEmploymentCount} ({employmentPct}%)
-                        </span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-purple-500 rounded-full transition-all duration-500"
-                          style={{ width: `${employmentPct}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
                   </div>
 
-                  {/* Connected Summary Pill */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="flex items-center gap-1">
-                      <Activity className="w-3 h-3 text-emerald-600" />
-                      {metrics.executionsCount} عمليات تنفيذ
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Smile className="w-3 h-3 text-blue-600" />
-                      {metrics.surveysCount} استبيانات
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Award className="w-3 h-3 text-amber-600" />
-                      {metrics.evaluationsCount > 0 ? `تقييم ${metrics.avgEvalScore}%` : 'غير مقيم'}
-                    </span>
-                  </div>
+                </div>
 
-                  {/* Signed PDF Document Bar in Card */}
-                  <div className="mt-3 pt-2.5 border-t border-slate-100">
+                {/* Card Actions Footer (Anchored to the exact bottom) */}
+                <div className="bg-slate-50/90 p-3 border-t border-slate-100 flex items-center justify-between gap-2 transition-all mt-auto" onClick={(e) => e.stopPropagation()}>
+                  
+                  {/* Primary Action Button (Clean, prominent, and full-width by default) */}
+                  <button
+                    onClick={handleCardViewDetails}
+                    className="flex-1 py-2 px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white hover:bg-emerald-700 text-emerald-800 hover:text-white border border-emerald-300 hover:border-emerald-700 shadow-2xs group-hover:border-emerald-500"
+                    title="استعراض بيانات وتفاصيل الاتفاقية بالكامل"
+                  >
+                    <FileText className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover:text-inherit" />
+                    <span className="whitespace-nowrap">استعراض البيانات بالكامل</span>
+                  </button>
+
+                  {/* Secondary Action Buttons (Hidden by default, smooth animated appearance on card hover) */}
+                  <div className="flex items-center gap-1.5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto max-w-0 group-hover:max-w-[150px] overflow-hidden transition-all duration-300 ease-in-out">
+                    {/* PDF Preview Button */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setPdfModalAgreement(agr);
                       }}
-                      className="inline-flex items-center justify-between gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200/80 text-[11px] font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group w-full"
-                      title="معاينة وثيقة الاتفاقية الموقعة بصيغة PDF"
+                      className="p-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 border border-rose-200 hover:border-rose-300 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                      title={`معاينة وثيقة PDF المعتمدة: ${agr.documentName || 'الاتفاقية'}`}
                     >
-                      <div className="flex items-center gap-1.5 truncate">
-                        <FileText className="w-4 h-4 text-rose-600 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="truncate">
-                          {agr.documentName || `معاينة وثيقة الاتفاقية الموقعة (PDF)`}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono bg-rose-200/70 px-2 py-0.5 rounded text-rose-900 shrink-0 font-bold">
-                        {agr.documentSize || 'PDF'}
-                      </span>
+                      <FileText className="w-4 h-4 text-rose-600" />
                     </button>
-                  </div>
 
-                </div>
-
-                {/* Card Actions Footer */}
-                <div className="bg-slate-50 p-3 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
-                  
-                  {/* View Details Button (Replaces link button with same style & full width flex) */}
-                  <button
-                    onClick={handleCardViewDetails}
-                    className="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white hover:bg-emerald-600 text-emerald-800 hover:text-white border border-emerald-300 hover:border-emerald-600 shadow-2xs"
-                    title="استعراض بيانات وتفاصيل الاتفاقية بالكامل"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>استعراض البيانات بالكامل</span>
-                  </button>
-
-                  <div className="flex items-center gap-1">
+                    {/* Edit Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenEdit(agr);
                       }}
-                      className="p-2 rounded-xl bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 transition-colors cursor-pointer"
-                      title="تعديل الاتفاقية"
+                      className="p-2 rounded-xl bg-white hover:bg-blue-50 text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                      title="تعديل بيانات الاتفاقية"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
+
+                    {/* Delete Button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setDeleteConfirmId(agr.id);
                       }}
-                      className="p-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 transition-colors cursor-pointer shrink-0 shadow-2xs"
                       title="حذف الاتفاقية"
                     >
                       <Trash2 className="w-4 h-4" />

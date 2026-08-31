@@ -180,12 +180,10 @@ export default function App() {
   // Agreement Handlers
   const handleSelectAgreement = (agreement: Agreement) => {
     setSelectedAgreementId(agreement.id);
-    showToast(`تم ربط النظام بالشريك: "${agreement.partnerName}"`);
   };
 
   const handleClearSelectedAgreement = () => {
     setSelectedAgreementId(null);
-    showToast('تم إلغاء التحديد وعرض كافة الاتفاقيات');
   };
 
   const handleAddAgreement = (newAgr: Agreement) => {
