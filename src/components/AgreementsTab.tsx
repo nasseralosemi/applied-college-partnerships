@@ -50,6 +50,7 @@ interface AgreementsTabProps {
   surveys: PartnerSurvey[];
   evaluations: PartnerEvaluation[];
   selectedAgreementId: string | null;
+  canAccessEvaluation?: boolean;
   onSelectAgreement: (agreement: Agreement) => void;
   onAddAgreement: (agreement: Agreement) => void;
   onUpdateAgreement: (agreement: Agreement) => void;
@@ -85,6 +86,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
   surveys,
   evaluations,
   selectedAgreementId,
+  canAccessEvaluation = true,
   onSelectAgreement,
   onAddAgreement,
   onUpdateAgreement,
@@ -600,7 +602,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
                     {/* Connected Summary Badges (Enlarged, Styled, and Color-Coded) */}
                     <div 
                       onClick={(e) => e.stopPropagation()}
-                      className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1.5 select-none cursor-default"
+                      className={`mt-4 pt-3 border-t border-slate-100 grid ${canAccessEvaluation ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5 select-none cursor-default`}
                     >
                       {/* Executions Badge */}
                       <div 
@@ -620,20 +622,22 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
                         <span className="truncate">{metrics.surveysCount} استبيان</span>
                       </div>
 
-                      {/* Evaluation Badge */}
-                      <div 
-                        className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border text-xs font-bold shadow-2xs transition-colors ${
-                          metrics.evaluationsCount > 0
-                            ? 'bg-amber-50 text-amber-900 border-amber-300'
-                            : 'bg-amber-50/50 text-amber-800 border-amber-200/80'
-                        }`}
-                        title={metrics.evaluationsCount > 0 ? `متوسط التقييم المؤسسي: ${metrics.avgEvalScore}%` : 'حالة التقييم: غير مقيم حتى الآن'}
-                      >
-                        <Award className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span className="truncate">
-                          {metrics.evaluationsCount > 0 ? `${metrics.avgEvalScore}% تقييم` : 'غير مقيم'}
-                        </span>
-                      </div>
+                      {/* Evaluation Badge (Only visible when permitted) */}
+                      {canAccessEvaluation && (
+                        <div 
+                          className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border text-xs font-bold shadow-2xs transition-colors ${
+                            metrics.evaluationsCount > 0
+                              ? 'bg-amber-50 text-amber-900 border-amber-300'
+                              : 'bg-amber-50/50 text-amber-800 border-amber-200/80'
+                          }`}
+                          title={metrics.evaluationsCount > 0 ? `متوسط التقييم المؤسسي: ${metrics.avgEvalScore}%` : 'حالة التقييم: غير مقيم حتى الآن'}
+                        >
+                          <Award className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span className="truncate">
+                            {metrics.evaluationsCount > 0 ? `${metrics.avgEvalScore}% تقييم` : 'غير مقيم'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1338,7 +1342,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
               {/* Quick Navigation to Connected Tabs */}
               <div className="pt-3 border-t border-slate-200">
                 <h4 className="text-xs font-bold text-slate-700 mb-2.5">الانتقال للعمليات المرتبطة بهذا الشريك:</h4>
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid ${canAccessEvaluation ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                   <button
                     onClick={() => {
                       onSelectAgreement(viewingAgreement);
@@ -1363,17 +1367,19 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
                     <span>استبيانات الرضا</span>
                   </button>
 
-                  <button
-                    onClick={() => {
-                      onSelectAgreement(viewingAgreement);
-                      setViewingAgreement(null);
-                      onNavigateToTab('evaluation');
-                    }}
-                    className="p-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs flex flex-col items-center gap-1.5 border border-amber-200 transition-colors cursor-pointer"
-                  >
-                    <Award className="w-5 h-5 text-amber-600" />
-                    <span>التقييم المؤسسي</span>
-                  </button>
+                  {canAccessEvaluation && (
+                    <button
+                      onClick={() => {
+                        onSelectAgreement(viewingAgreement);
+                        setViewingAgreement(null);
+                        onNavigateToTab('evaluation');
+                      }}
+                      className="p-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs flex flex-col items-center gap-1.5 border border-amber-200 transition-colors cursor-pointer"
+                    >
+                      <Award className="w-5 h-5 text-amber-600" />
+                      <span>التقييم المؤسسي</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

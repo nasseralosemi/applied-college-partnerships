@@ -108,13 +108,41 @@ export interface PartnerEvaluation {
   createdAt: string;
 }
 
+export type UserRoleType = 
+  | 'admin' 
+  | 'president_assistant' 
+  | 'partnerships_head' 
+  | 'coordinator' 
+  | 'reviewer';
+
+export type AccountStatus = 'نشط' | 'معطل';
+
+export interface SystemUser {
+  id: string;
+  username: string;
+  email: string; // البريد الأكاديمي
+  name: string;
+  role: string;
+  roleType: UserRoleType;
+  status: AccountStatus;
+  department: string;
+  phone?: string;
+  initials: string;
+  avatarColor?: string;
+  lastLogin?: string;
+  createdAt: string;
+}
+
 export interface AuthUser {
   id: string;
   username: string;
+  email?: string;
   name: string;
   role: string;
+  roleType?: UserRoleType;
   department: string;
   initials: string;
+  status?: AccountStatus;
 }
 
 export interface StatsData {
@@ -125,3 +153,4 @@ export interface StatsData {
   totalTrainingBeneficiaries: number;
   totalEmploymentBeneficiaries: number;
 }
+

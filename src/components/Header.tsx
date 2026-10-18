@@ -1,19 +1,31 @@
 import React from 'react';
 import { 
-  Printer, 
   LogOut, 
-  GraduationCap
+  GraduationCap,
+  Crown,
+  ShieldCheck,
+  User,
+  Users,
+  Cloud
 } from 'lucide-react';
 import { AuthUser } from '../types';
 
 interface HeaderProps {
   currentUser?: AuthUser | null;
   onLogout: () => void;
+  onOpenUsersTab?: () => void;
+  onSwitchUserPrompt?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
-  onLogout 
+  currentUser,
+  onLogout,
+  onOpenUsersTab,
+  onSwitchUserPrompt
 }) => {
+  const isAdmin = currentUser?.roleType === 'admin';
+  const isPresidentAssistant = currentUser?.roleType === 'president_assistant';
+
   return (
     <header className="no-print bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-950 text-white shadow-lg border-b border-emerald-800/40 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -44,8 +56,79 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Left Side: Logout Action */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Left Side: Current User Info & Logout Action */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            
+            {/* Automatic Online Cloud Storage Status Badge */}
+            <div 
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold"
+              title="التخزين السحابي متصل وتلقائي — حفظ البيانات متزامن ومباشر"
+            >
+              <Cloud className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="hidden sm:inline">سحابي متصل ومباشر</span>
+              <span className="sm:hidden">سحابي</span>
+            </div>
+            
+            {/* Admin Direct Shortcut Button (Only visible for Admin) */}
+            {isAdmin && (
+              <button
+                onClick={onOpenUsersTab}
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-400/30 font-bold text-xs transition-all cursor-pointer"
+                title="لوحة تحكم مدير النظام لإدارة المستخدمين"
+              >
+                <Users className="w-3.5 h-3.5 text-purple-300" />
+                <span>إدارة الحسابات</span>
+              </button>
+            )}
+
+            {/* Logged in User Pill */}
+            {currentUser && (
+              <div 
+                onClick={isAdmin ? onOpenUsersTab : undefined}
+                className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border text-right max-w-[240px] transition-all ${
+                  isPresidentAssistant
+                    ? 'bg-amber-500/15 border-amber-400/30'
+                    : isAdmin 
+                      ? 'bg-purple-500/15 border-purple-400/30 hover:bg-purple-500/25 cursor-pointer'
+                      : 'bg-white/10 border-white/15'
+                }`}
+                title={
+                  isPresidentAssistant
+                    ? 'المكتب التنفيذي لسعادة مساعد الرئيس'
+                    : isAdmin 
+                      ? 'مدير النظام — اضغط لفتح لوحة إدارة الحسابات'
+                      : `الحساب الحالي: ${currentUser.role}`
+                }
+              >
+                <div className={`w-7 h-7 rounded-lg text-white font-mono font-bold text-[10px] flex items-center justify-center shrink-0 border ${
+                  isPresidentAssistant
+                    ? 'bg-amber-600 border-amber-300'
+                    : isAdmin
+                      ? 'bg-purple-600 border-purple-300'
+                      : 'bg-emerald-700 border-emerald-400/40'
+                }`}>
+                  {isPresidentAssistant ? (
+                    <Crown className="w-3.5 h-3.5 text-amber-200" />
+                  ) : isAdmin ? (
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-200" />
+                  ) : (
+                    currentUser.initials || 'م'
+                  )}
+                </div>
+                <div className="min-w-0 leading-tight">
+                  <div className="text-xs font-bold text-white truncate">
+                    {currentUser.name}
+                  </div>
+                  <div className={`text-[10px] truncate font-medium ${
+                    isPresidentAssistant ? 'text-amber-300 font-bold' : isAdmin ? 'text-purple-300 font-bold' : 'text-emerald-300'
+                  }`}>
+                    {currentUser.role}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Logout Button */}
             <button
               onClick={onLogout}

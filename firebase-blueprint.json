@@ -1,0 +1,139 @@
+{
+  "entities": {
+    "SystemUser": {
+      "title": "SystemUser",
+      "description": "System users and account roles for the partnerships management system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "roleType": { 
+          "type": "string",
+          "enum": ["admin", "president_assistant", "partnerships_head", "coordinator", "reviewer"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["نشط", "معطل"]
+        },
+        "department": { "type": "string" },
+        "initials": { "type": "string" },
+        "phone": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "lastLogin": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "username", "name", "role", "roleType", "status"]
+    },
+    "Agreement": {
+      "title": "Agreement",
+      "description": "Partnership and Memorandum of Understanding agreements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "partnerName": { "type": "string" },
+        "partnerType": { "type": "string" },
+        "signDate": { "type": "string" },
+        "expiryDate": { "type": "string" },
+        "status": { "type": "string" },
+        "collegeBranch": { "type": "string" },
+        "objectives": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "partnerName", "partnerType", "signDate", "expiryDate", "status", "collegeBranch"]
+    },
+    "ExecutionActivity": {
+      "title": "ExecutionActivity",
+      "description": "Execution activities, training sessions, and employment outcomes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agreementId": { "type": "string" },
+        "partnerName": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string" },
+        "traineesCount": { "type": "number" },
+        "employedCount": { "type": "number" },
+        "supervisor": { "type": "string" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "agreementId", "partnerName", "title", "date", "type"]
+    },
+    "PartnerSurvey": {
+      "title": "PartnerSurvey",
+      "description": "Partner satisfaction survey submissions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agreementId": { "type": "string" },
+        "partnerName": { "type": "string" },
+        "respondentName": { "type": "string" },
+        "respondentRole": { "type": "string" },
+        "date": { "type": "string" },
+        "overallSatisfaction": { "type": "number" },
+        "communicationQuality": { "type": "number" },
+        "studentCommitment": { "type": "number" },
+        "academicCoordination": { "type": "number" },
+        "willingnessToRenew": { "type": "number" },
+        "feedback": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "agreementId", "partnerName", "date", "overallSatisfaction"]
+    },
+    "PartnerEvaluation": {
+      "title": "PartnerEvaluation",
+      "description": "Institutional partner evaluations and accreditation scores",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agreementId": { "type": "string" },
+        "partnerName": { "type": "string" },
+        "evaluatorName": { "type": "string" },
+        "date": { "type": "string" },
+        "period": { "type": "string" },
+        "complianceWithTerms": { "type": "number" },
+        "trainingEnvironmentQuality": { "type": "number" },
+        "mentorshipQuality": { "type": "number" },
+        "employmentConversion": { "type": "number" },
+        "responsiveness": { "type": "number" },
+        "overallScore": { "type": "number" },
+        "classification": { "type": "string" },
+        "decision": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "agreementId", "partnerName", "date", "overallScore", "classification"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "SystemUser" },
+      "description": "Collection of system users and accounts"
+    },
+    "/agreements/{agreementId}": {
+      "schema": { "$ref": "Agreement" },
+      "description": "Collection of partnership agreements and MOUs"
+    },
+    "/executions/{executionId}": {
+      "schema": { "$ref": "ExecutionActivity" },
+      "description": "Collection of execution and training/employment operations"
+    },
+    "/surveys/{surveyId}": {
+      "schema": { "$ref": "PartnerSurvey" },
+      "description": "Collection of partner satisfaction surveys"
+    },
+    "/evaluations/{evaluationId}": {
+      "schema": { "$ref": "PartnerEvaluation" },
+      "description": "Collection of institutional evaluations and committee decisions"
+    }
+  }
+}
