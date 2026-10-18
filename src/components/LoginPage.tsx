@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   GraduationCap, 
   Lock, 
@@ -12,9 +12,7 @@ import {
   CheckCircle2, 
   AlertCircle,
   Sparkles,
-  Briefcase,
   KeyRound,
-  ArrowRight,
   Cloud
 } from 'lucide-react';
 import { AuthUser, SystemUser } from '../types';
@@ -42,14 +40,20 @@ interface PortalConfig {
   defaultUsername: string;
 }
 
+// ---------------------------------------------------------------------------
+// Exact requested Portal Role Tab Labels:
+// 1. "الموظفون"
+// 2. "المسؤول"
+// 3. "مدير النظام"
+// ---------------------------------------------------------------------------
 const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
   staff: {
     id: 'staff',
-    tabLabel: 'الموظفون والمسؤولون',
-    tabEnglish: 'Staff & Officers',
+    tabLabel: 'الموظفون',
+    tabEnglish: 'Staff',
     cardTitle: 'بوابة الموظفين ومسؤولي الشراكات',
-    cardSubtitle: 'مدخلات الاتفاقيات وعمليات التدريب والتوظيف واستبيانات الرضا',
-    portalBadge: 'بوابة العمليات التشغيلية والشراكات',
+    cardSubtitle: 'مدخلات الاتفاقيات وعمليات التدريب والتوظيف واستبيانات الشركاء',
+    portalBadge: 'بوابة الموظفين والعمليات التشغيلية',
     icon: Users,
     accentColor: 'from-emerald-600 via-teal-500 to-emerald-400',
     buttonGradient: 'from-emerald-800 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:to-teal-700',
@@ -59,9 +63,9 @@ const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
   },
   president: {
     id: 'president',
-    tabLabel: 'مساعد الرئيس',
-    tabEnglish: 'President Assistant',
-    cardTitle: 'المكتب التنفيذي لمساعد الرئيس',
+    tabLabel: 'المسؤول',
+    tabEnglish: 'Executive',
+    cardTitle: 'بوابة المسؤول (المكتب التنفيذي)',
     cardSubtitle: 'لوحة التحليلات والمؤشرات البيانية ومراجعة تقييم الشريك المؤسسي',
     portalBadge: 'الواجهة التنفيذية لسعادة مساعد الرئيس',
     icon: Crown,
@@ -73,9 +77,9 @@ const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
   },
   admin: {
     id: 'admin',
-    tabLabel: 'مدير النظام (Admin)',
+    tabLabel: 'مدير النظام',
     tabEnglish: 'System Admin',
-    cardTitle: 'لوحة تحكم مدير النظام (Admin)',
+    cardTitle: 'لوحة تحكم مدير النظام',
     cardSubtitle: 'إدارة وتعديل وإنشاء حسابات المستخدمين وتعيين الصلاحيات فقط',
     portalBadge: 'بوابة الإدارة التقنية للحسابات والصلاحيات',
     icon: ShieldCheck,
@@ -232,59 +236,63 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 flex flex-col justify-between p-3 sm:p-6 lg:p-8 selection:bg-emerald-600 selection:text-white" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 flex flex-col justify-between p-3 sm:p-5 md:p-8 selection:bg-emerald-600 selection:text-white" dir="rtl">
       
-      {/* Top University Brand Sub-Header */}
-      <header className="max-w-6xl mx-auto w-full flex items-center justify-between py-2 sm:py-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 border border-emerald-400/40 flex items-center justify-center text-amber-300 shadow-md">
+      {/* =========================================================================
+          Top University Brand Header (Fully Responsive with Smooth Wrapping)
+         ========================================================================= */}
+      <header className="max-w-5xl mx-auto w-full flex items-center justify-between gap-3 py-2 sm:py-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 border border-emerald-400/40 flex items-center justify-center text-amber-300 shadow-md shrink-0">
             <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <div className="text-white text-xs sm:text-sm font-bold tracking-tight">
+          <div className="min-w-0">
+            <div className="text-white text-xs sm:text-sm font-bold tracking-tight truncate">
               جامعة المجمعة | Majmaah University
             </div>
-            <div className="text-emerald-300 text-[10px] sm:text-xs font-medium">
+            <div className="text-emerald-300 text-[10px] sm:text-xs font-medium truncate mt-0.5">
               الكلية التطبيقية — نظام إدارة الشراكات والاتفاقيات
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Direct Automatic Cloud Storage Badge */}
           <div 
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold backdrop-blur-xs"
-            title="التخزين السحابي نشط وتلقائي — حفظ البيانات متزامن ومباشر دون إعدادات يدوية"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] sm:text-xs font-bold backdrop-blur-xs"
+            title="التخزين السحابي نشط وتلقائي — حفظ البيانات متزامن ومباشر"
           >
-            <Cloud className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="hidden sm:inline">سحابي مباشر وتلقائي</span>
-            <span className="sm:hidden text-[11px]">سحابي مباشر</span>
+            <Cloud className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span className="hidden sm:inline">سحابي مباشر</span>
+            <span className="sm:hidden">سحابي</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs text-emerald-200/90 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-full backdrop-blur-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>بوابة الدخول الموحد المعتمدة بحسب الصلاحيات</span>
+          <div className="hidden lg:flex items-center gap-1.5 text-xs text-emerald-200/90 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>بوابة موحدة معتمدة</span>
           </div>
         </div>
       </header>
 
-      {/* Main Login Workspace */}
-      <div className="my-auto max-w-xl w-full mx-auto py-4 sm:py-6">
+      {/* =========================================================================
+          Main Login Workspace Container (Optimized for all viewports)
+         ========================================================================= */}
+      <div className="my-auto max-w-lg w-full mx-auto py-3 sm:py-6 px-1 sm:px-0">
         
         {/* =========================================================================
             1. PORTAL ROLE TABS (Top Tab Bar Above Login Card)
-            3 Dedicated Doors: Staff & Officers, President Assistant, Admin
+            3 Explicitly Named Doors: "الموظفون" | "المسؤول" | "مدير النظام"
            ========================================================================= */}
         <div className="mb-3 sm:mb-4">
           <div className="text-center mb-2">
-            <span className="text-[11px] font-bold text-emerald-300/90 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30 inline-flex items-center gap-1.5 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>اختر بوابة الدخول بحسب دورك الوظيفي والصلاحية:</span>
+            <span className="text-[11px] font-bold text-emerald-300/95 bg-emerald-950/70 px-3 py-1 rounded-full border border-emerald-500/30 inline-flex items-center gap-1.5 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>اختر بوابة الدخول بحسب الصلاحية:</span>
             </span>
           </div>
 
-          <nav aria-label="أبواب الدخول بحسب الدور" className="grid grid-cols-3 gap-1.5 sm:gap-2.5 p-1.5 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md shadow-2xl">
+          <nav aria-label="أبواب الدخول بحسب الدور" className="grid grid-cols-3 gap-1 sm:gap-2 p-1.5 rounded-2xl bg-slate-900/85 border border-slate-700/80 backdrop-blur-md shadow-2xl">
             {(Object.keys(PORTAL_CONFIGS) as PortalTabId[]).map((portalKey) => {
               const cfg = PORTAL_CONFIGS[portalKey];
               const Icon = cfg.icon;
@@ -294,21 +302,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <button
                   key={portalKey}
                   type="button"
+                  id={`portal-tab-${portalKey}`}
                   onClick={() => handleTabChange(portalKey)}
-                  className={`relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-1 sm:px-3 rounded-xl sm:rounded-2xl transition-all cursor-pointer border ${
+                  className={`relative flex flex-col items-center justify-center py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl transition-all cursor-pointer border ${
                     isActive
                       ? `${cfg.activeTabClass} border`
                       : 'border-transparent text-slate-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                    <Icon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${isActive ? '' : 'text-slate-400'}`} />
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? '' : 'text-slate-400'}`} />
                     <span className="text-xs sm:text-sm font-black whitespace-nowrap">
                       {cfg.tabLabel}
                     </span>
                   </div>
                   <span className={`text-[9px] sm:text-[10px] hidden xs:inline tracking-tight truncate max-w-full ${
-                    isActive ? (portalKey === 'president' ? 'text-slate-800 font-bold' : 'text-white/80') : 'text-slate-400'
+                    isActive 
+                      ? (portalKey === 'president' ? 'text-slate-800 font-bold' : 'text-white/80') 
+                      : 'text-slate-400'
                   }`}>
                     {cfg.tabEnglish}
                   </span>
@@ -321,32 +332,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {/* =========================================================================
             2. LOGIN CARD CONTAINER (Dynamically updates with selected portal)
            ========================================================================= */}
-        <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-slate-200/90 relative overflow-hidden transition-all duration-300">
+        <div className="bg-white rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl border border-slate-200/90 relative overflow-hidden transition-all duration-300">
           
           {/* Top Dynamic Decorative Accent Strip */}
           <div className={`absolute top-0 right-0 left-0 h-2 bg-gradient-to-r ${currentConfig.accentColor} transition-all duration-300`}></div>
 
           {/* Card Header — Role Specific Identity */}
-          <div className="text-center mb-6 pt-2">
-            <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${currentConfig.iconBgClass} border-2 flex items-center justify-center mx-auto shadow-lg mb-3 transition-all duration-300`}>
-              <PortalIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+          <div className="text-center mb-5 sm:mb-6 pt-1 sm:pt-2">
+            <div className={`w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${currentConfig.iconBgClass} border-2 flex items-center justify-center mx-auto shadow-lg mb-3 transition-all duration-300`}>
+              <PortalIcon className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200 mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>{currentConfig.portalBadge}</span>
+              <span className="truncate max-w-[260px]">{currentConfig.portalBadge}</span>
             </div>
 
-            <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-base sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight">
               {currentConfig.cardTitle}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed max-w-md mx-auto">
+            <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-1 leading-relaxed max-w-md mx-auto">
               {currentConfig.cardSubtitle}
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
             
             {/* Error Message */}
             {error && (
@@ -381,8 +392,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <label className="block text-xs font-bold text-slate-700">
                   كلمة المرور (Password)
                 </label>
-                <span className="text-[11px] text-slate-400 font-medium">
-                  الافتراضية للتجربة: <strong className="text-slate-700 font-mono">123456</strong>
+                <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                  الافتراضية: <strong className="text-slate-700 font-mono">123456</strong>
                 </span>
               </div>
               <div className="relative">
@@ -412,7 +423,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               type="submit"
               id="btn-submit-login"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl bg-gradient-to-r ${currentConfig.buttonGradient} text-white font-black text-sm shadow-md hover:shadow-xl transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 mt-2`}
+              className={`w-full py-3 sm:py-3.5 px-4 rounded-xl bg-gradient-to-r ${currentConfig.buttonGradient} text-white font-black text-xs sm:text-sm shadow-md hover:shadow-xl transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 mt-1 sm:mt-2`}
             >
               {isLoading ? (
                 <>
@@ -433,18 +444,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               3. DEMO ACCOUNTS FOR THIS PORTAL
               Filtered strictly by active role portal
              ========================================================================= */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-purple-600" />
-                <span>الحسابات التجريبية المعتمدة لهذه البوابة:</span>
+          <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-2 sm:mb-2.5 gap-2">
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
+                <KeyRound className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span>الحسابات التجريبية المعتمدة:</span>
               </span>
-              <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-full border border-slate-200">
-                نقرة واحدة للتعبئة
+              <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full border border-slate-200 shrink-0">
+                نقرة للتعبئة
               </span>
             </div>
 
-            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-0.5">
+            <div className="space-y-1.5 sm:space-y-2 max-h-[190px] sm:max-h-[220px] overflow-y-auto pr-0.5">
               {portalUsers.length === 0 ? (
                 <div className="text-center py-4 text-xs text-slate-400">
                   لا توجد حسابات مسجلة تحت هذا الدور، يمكنك كتابة اسم المستخدم للدخول
@@ -458,7 +469,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       key={usr.id}
                       type="button"
                       onClick={() => handleSelectQuickUser(usr)}
-                      className={`w-full text-right p-2.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                      className={`w-full text-right p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all flex items-center justify-between cursor-pointer gap-2 ${
                         isSelected
                           ? activePortal === 'president'
                             ? 'bg-amber-50/90 border-amber-300 text-amber-950 font-bold shadow-xs'
@@ -469,7 +480,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className={`w-8 h-8 rounded-xl text-white font-mono text-[11px] font-bold flex items-center justify-center shrink-0 shadow-xs bg-gradient-to-br ${
+                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-white font-mono text-[10px] sm:text-[11px] font-bold flex items-center justify-center shrink-0 shadow-xs bg-gradient-to-br ${
                           usr.avatarColor || (
                             activePortal === 'president'
                               ? 'from-amber-600 to-amber-800'
@@ -479,9 +490,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           )
                         }`}>
                           {usr.roleType === 'president_assistant' ? (
-                            <Crown className="w-4 h-4 text-amber-300" />
+                            <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
                           ) : usr.roleType === 'admin' ? (
-                            <ShieldCheck className="w-4 h-4 text-purple-200" />
+                            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
                           ) : (
                             usr.initials
                           )}
@@ -499,18 +510,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
                       <div className="flex items-center gap-2 shrink-0">
                         {isSelected ? (
-                          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                          <span className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full ${
                             activePortal === 'president'
                               ? 'bg-amber-200/80 text-amber-900'
                               : activePortal === 'admin'
                                 ? 'bg-purple-200/80 text-purple-900'
                                 : 'bg-emerald-200/80 text-emerald-900'
                           }`}>
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             <span>محدد</span>
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-400 group-hover:text-slate-600">
+                          <span className="text-[10px] text-slate-400">
                             اختيار
                           </span>
                         )}
@@ -525,12 +536,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
       </div>
 
-      {/* Footer Info */}
-      <footer className="max-w-6xl mx-auto w-full text-center text-xs text-slate-400 py-2 sm:py-3">
-        <p className="font-semibold text-slate-300">
+      {/* =========================================================================
+          Footer Info (Balanced padding, smooth responsive text)
+         ========================================================================= */}
+      <footer className="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 py-2 sm:py-3 px-2">
+        <p className="font-semibold text-slate-300 text-[11px] sm:text-xs">
           المملكة العربية السعودية — جامعة المجمعة | الكلية التطبيقية
         </p>
-        <p className="text-[11px] text-slate-500 mt-0.5">
+        <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
           جامعة المجمعة | الكلية التطبيقية - وحدة الشراكات © {new Date().getFullYear()} — نظام الاتفاقيات الإلكتروني الموحد وإدارة الصلاحيات
         </p>
       </footer>

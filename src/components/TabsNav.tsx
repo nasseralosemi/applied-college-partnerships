@@ -124,11 +124,10 @@ export const TabsNav: React.FC<TabsNavProps> = ({
     }
 
     // 3. Employees & Coordinators (partnerships_head, coordinator, reviewer, general):
+    // Re-enable 'evaluation' ("تقييم الشريك المؤسسي") fully!
     // Strictly HIDE:
-    // - 'evaluation' ("تقييم الشريك المؤسسي")
     // - 'president-dashboard' ("لوحة مساعد الرئيس")
     // - 'users' (Admin Users management)
-    if (tab.id === 'evaluation') return false;
     if (tab.id === 'president-dashboard') return false;
     if (tab.id === 'users') return false;
 
@@ -309,10 +308,10 @@ export const TabsNav: React.FC<TabsNavProps> = ({
 
         {/* =========================================================================
             2. DESKTOP TABS BAR (Visible only on hidden md:block)
-            Horizontal tabs with full badges and role constraints
+            Modern, formatted horizontal navigation tabs
            ========================================================================= */}
-        <div className="hidden md:flex items-center justify-between overflow-x-auto no-scrollbar gap-1 py-1">
-          <div className="flex items-center gap-1 min-w-max">
+        <div className="hidden md:flex items-center overflow-x-auto no-scrollbar py-1.5">
+          <div className="flex items-center gap-1.5 min-w-max">
             {allowedTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -323,17 +322,17 @@ export const TabsNav: React.FC<TabsNavProps> = ({
                   type="button"
                   id={`tab-btn-${tab.id}`}
                   onClick={() => onTabChange(tab.id)}
-                  className={`group relative flex items-center gap-2 px-3.5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive
                       ? tab.id === 'president-dashboard'
                         ? 'bg-amber-100/90 text-amber-950 border border-amber-300/80 shadow-xs'
                         : tab.id === 'users'
                           ? 'bg-purple-100/90 text-purple-950 border border-purple-300/80 shadow-xs'
                           : 'bg-white text-emerald-950 border border-slate-200/90 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
-                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     isActive
                       ? tab.id === 'president-dashboard'
                         ? 'bg-amber-600 text-white'
@@ -372,12 +371,6 @@ export const TabsNav: React.FC<TabsNavProps> = ({
                 </button>
               );
             })}
-          </div>
-
-          {/* Role Status Tag on the left side of desktop bar */}
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-200/60 text-slate-600 text-xs font-semibold shrink-0">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-            <span>الصلاحية: {currentUser?.role || 'مستخدم النظام'}</span>
           </div>
         </div>
 

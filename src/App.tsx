@@ -193,8 +193,8 @@ export default function App() {
     } else if (currentUser.roleType === 'admin') {
       // Admin has unrestricted access
     } else {
-      // Employees / Coordinators: Evaluation tab, President tab, and Users tab are strictly forbidden!
-      if (activeTab === 'evaluation' || activeTab === 'president-dashboard' || activeTab === 'users') {
+      // Employees / Coordinators: Evaluation tab is fully permitted. Only President Dashboard and Admin Users are restricted.
+      if (activeTab === 'president-dashboard' || activeTab === 'users') {
         setActiveTab('agreements');
       }
     }
@@ -527,7 +527,7 @@ export default function App() {
             surveys={surveys}
             evaluations={evaluations}
             selectedAgreementId={selectedAgreementId}
-            canAccessEvaluation={false}
+            canAccessEvaluation={true}
             onSelectAgreement={handleSelectAgreement}
             onAddAgreement={handleAddAgreement}
             onUpdateAgreement={handleUpdateAgreement}
