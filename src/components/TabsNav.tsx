@@ -145,7 +145,7 @@ export const TabsNav: React.FC<TabsNavProps> = ({
   // If user is President Assistant, show a dedicated executive indicator bar
   if (roleType === 'president_assistant') {
     return (
-      <nav aria-label="شريط مساعد الرئيس التنفيذي" className="no-print bg-slate-900 text-white border-b border-amber-500/30 shadow-md sticky top-[57px] sm:top-[69px] z-40">
+      <nav aria-label="شريط مساعد الرئيس التنفيذي" className="no-print bg-slate-900 text-white border-b border-amber-500/30 shadow-md sticky top-[52px] sm:top-[58px] z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
@@ -175,7 +175,7 @@ export const TabsNav: React.FC<TabsNavProps> = ({
   // If user is Admin, show a dedicated System Admin Panel bar (exclusive to accounts management)
   if (roleType === 'admin') {
     return (
-      <nav aria-label="شريط مدير النظام" className="no-print bg-slate-900 text-white border-b border-purple-500/30 shadow-md sticky top-[57px] sm:top-[69px] z-40">
+      <nav aria-label="شريط مدير النظام" className="no-print bg-slate-900 text-white border-b border-purple-500/30 shadow-md sticky top-[52px] sm:top-[58px] z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300">
@@ -203,7 +203,7 @@ export const TabsNav: React.FC<TabsNavProps> = ({
   }
 
   return (
-    <nav aria-label="شريط التبويبات الرئيسي" className="no-print bg-slate-50/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs sticky top-[57px] sm:top-[69px] z-40">
+    <nav aria-label="شريط التبويبات الرئيسي" className="no-print bg-slate-50/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs sticky top-[52px] sm:top-[58px] z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
         {/* =========================================================================
