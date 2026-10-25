@@ -788,7 +788,7 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
                           <button
                             onClick={() => setDeleteConfirmId(agr.id)}
                             className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 cursor-pointer"
-                            title="حذف"
+                            title="حذف الاتفاقية"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -805,28 +805,53 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-150">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4 mx-auto">
-              <Trash2 className="w-6 h-6" />
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setDeleteConfirmId(null)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150 text-center"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center mb-4 mx-auto shadow-xs">
+              <Trash2 className="w-7 h-7" />
             </div>
-            <h4 className="text-lg font-bold text-slate-900 text-center mb-2">تأكيد حذف الاتفاقية</h4>
-            <p className="text-xs text-slate-600 text-center mb-6 leading-relaxed">
-              هل أنت متأكد من رغبتك في حذف هذه الاتفاقية ({deleteConfirmId})؟ سيتم تحديث كافة المؤشرات الإحصائية فوراً.
+
+            <h4 className="text-lg font-bold text-slate-900 mb-2">تأكيد حذف الاتفاقية</h4>
+
+            {(() => {
+              const targetAgr = agreements.find(a => a.id === deleteConfirmId);
+              return targetAgr ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 mb-3 text-right">
+                  <div className="font-bold text-slate-800 text-xs truncate">{targetAgr.partnerName}</div>
+                  <div className="text-[11px] font-mono text-slate-500">{targetAgr.id} • {targetAgr.agreementType}</div>
+                </div>
+              ) : null;
+            })()}
+
+            <p className="text-sm font-semibold text-slate-800 mb-6 leading-relaxed">
+              هل أنت تأكد من رغبتك في حذف هذه الاتفاقية؟ لا يمكن التراجع عن هذه الخطوة.
             </p>
+
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={() => {
                   onDeleteAgreement(deleteConfirmId);
+                  if (viewingAgreement && viewingAgreement.id === deleteConfirmId) {
+                    setViewingAgreement(null);
+                  }
                   setDeleteConfirmId(null);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs transition-colors cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-1.5"
               >
-                نعم، احذف الاتفاقية
+                <Trash2 className="w-4 h-4" />
+                <span>تأكيد الحذف</span>
               </button>
               <button
+                type="button"
                 onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
               >
                 إلغاء
               </button>
@@ -1386,22 +1411,33 @@ export const AgreementsTab: React.FC<AgreementsTabProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-50 rounded-b-3xl border-t border-slate-200 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 rounded-b-3xl border-t border-slate-200 flex flex-wrap justify-between items-center gap-2">
               <button
                 onClick={() => {
                   onSelectAgreement(viewingAgreement);
                   setViewingAgreement(null);
                 }}
-                className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow cursor-pointer transition-colors"
               >
                 تحديد كشريك حالي للنظام ✓
               </button>
-              <button
-                onClick={() => setViewingAgreement(null)}
-                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
-              >
-                إغلاق
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmId(viewingAgreement.id)}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                  title="حذف الاتفاقية"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>حذف الاتفاقية</span>
+                </button>
+                <button
+                  onClick={() => setViewingAgreement(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+                >
+                  إغلاق
+                </button>
+              </div>
             </div>
 
           </div>
