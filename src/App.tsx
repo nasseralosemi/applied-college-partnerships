@@ -565,13 +565,13 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="no-print bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 space-y-1">
+      <footer className="no-print bg-white border-t border-slate-200 py-6 mt-auto text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 space-y-1.5">
           <p className="font-bold text-slate-700">
             نظام إدارة الشراكات والاتفاقيات — الكلية التطبيقية | جامعة المجمعة
           </p>
-          <p className="text-slate-400">
-            جامعة المجمعة | الكلية التطبيقية - وحدة الشراكات © {new Date().getFullYear()} — نظام إدارة الصلاحيات والأدوار المعتمد
+          <p className="text-xs text-slate-600 font-medium">
+            جميع الحقوق محفوظة © 2026 | تصميم وبرمجة: أ. ناصر العصيمي
           </p>
         </div>
       </footer>

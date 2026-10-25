@@ -396,12 +396,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       {/* =========================================================================
           Footer Info
          ========================================================================= */}
-      <footer className="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 py-2 sm:py-3 px-2">
+      <footer className="max-w-5xl mx-auto w-full text-center text-xs py-3 px-2 space-y-1 mt-auto">
         <p className="font-semibold text-slate-300 text-[11px] sm:text-xs">
           المملكة العربية السعودية — جامعة المجمعة | الكلية التطبيقية
         </p>
-        <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
-          جامعة المجمعة | الكلية التطبيقية - وحدة الشراكات © {new Date().getFullYear()} — بوابة الدخول الرسمية المعتمدة
+        <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
+          جميع الحقوق محفوظة © 2026 | تصميم وبرمجة: أ. ناصر العصيمي
         </p>
       </footer>
 
