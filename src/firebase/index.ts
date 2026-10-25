@@ -1,10 +1,53 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import rawConfig from '../../firebase-applet-config.json';
 
-// Initialize Firebase App
-const app = initializeApp(firebaseConfig);
+// Built-in automated Firebase config - zero manual env input needed!
+const DEFAULT_FIREBASE_CONFIG = {
+  projectId: "gen-lang-client-0883167252",
+  appId: "1:48384264797:web:f3f85148efdc530a18dbb4",
+  apiKey: "AIzaSyCSV4YV73vR2rufAREGfW1sCi6rogGGPaA",
+  authDomain: "gen-lang-client-0883167252.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-aa02ed8f-eb6c-4ea9-8596-bdd16ce71f47",
+  storageBucket: "gen-lang-client-0883167252.firebasestorage.app",
+  messagingSenderId: "48384264797"
+};
+
+// Robust configuration merging: (1) inline defaults, (2) json config, (3) optional env
+const firebaseConfig = {
+  projectId: 
+    rawConfig?.projectId || 
+    import.meta.env?.VITE_FIREBASE_PROJECT_ID || 
+    DEFAULT_FIREBASE_CONFIG.projectId,
+  appId: 
+    rawConfig?.appId || 
+    import.meta.env?.VITE_FIREBASE_APP_ID || 
+    DEFAULT_FIREBASE_CONFIG.appId,
+  apiKey: 
+    rawConfig?.apiKey || 
+    import.meta.env?.VITE_FIREBASE_API_KEY || 
+    DEFAULT_FIREBASE_CONFIG.apiKey,
+  authDomain: 
+    rawConfig?.authDomain || 
+    import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || 
+    DEFAULT_FIREBASE_CONFIG.authDomain,
+  firestoreDatabaseId: 
+    rawConfig?.firestoreDatabaseId || 
+    import.meta.env?.VITE_FIREBASE_DATABASE_ID || 
+    DEFAULT_FIREBASE_CONFIG.firestoreDatabaseId,
+  storageBucket: 
+    rawConfig?.storageBucket || 
+    import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || 
+    DEFAULT_FIREBASE_CONFIG.storageBucket,
+  messagingSenderId: 
+    rawConfig?.messagingSenderId || 
+    import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || 
+    DEFAULT_FIREBASE_CONFIG.messagingSenderId
+};
+
+// Initialize Firebase App safely (prevent duplicate initialization)
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firestore with configured databaseId (CRITICAL: Required for multi-database instances)
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);

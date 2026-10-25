@@ -8,13 +8,6 @@ import {
   AuthUser,
   SystemUser
 } from './types';
-import { 
-  INITIAL_AGREEMENTS, 
-  INITIAL_EXECUTIONS, 
-  INITIAL_SURVEYS, 
-  INITIAL_EVALUATIONS 
-} from './data/initialData';
-import { INITIAL_USERS } from './data/initialUsers';
 import { Header } from './components/Header';
 import { LoginPage } from './components/LoginPage';
 import { StatsBar } from './components/StatsBar';
@@ -28,7 +21,6 @@ import { PresidentDashboardTab } from './components/PresidentDashboardTab';
 import { UsersTab } from './components/UsersTab';
 import { CheckCircle } from 'lucide-react';
 import { 
-  seedDatabaseIfEmpty,
   subscribeToUsers,
   subscribeToAgreements,
   subscribeToExecutions,
@@ -60,56 +52,66 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved) as AuthUser;
+        if (parsed.roleType === 'admin' && parsed.username.toLowerCase() === 'admin') {
+          return { ...parsed, username: 'Alosemi', name: 'مدير النظام (Alosemi)' };
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
   });
 
-  // System Users State
+  // System Users State - strictly loaded from Firebase Firestore
   const [users, setUsers] = useState<SystemUser[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.USERS);
-      return saved ? JSON.parse(saved) : INITIAL_USERS;
+      if (saved) {
+        return JSON.parse(saved) as SystemUser[];
+      }
+      return [];
     } catch {
-      return INITIAL_USERS;
+      return [];
     }
   });
 
-  // Agreements and Operational State
+  // Agreements and Operational State - strictly live cloud data
   const [agreements, setAgreements] = useState<Agreement[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.AGREEMENTS);
-      return saved ? JSON.parse(saved) : INITIAL_AGREEMENTS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_AGREEMENTS;
+      return [];
     }
   });
 
   const [executions, setExecutions] = useState<ExecutionActivity[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.EXECUTIONS);
-      return saved ? JSON.parse(saved) : INITIAL_EXECUTIONS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_EXECUTIONS;
+      return [];
     }
   });
 
   const [surveys, setSurveys] = useState<PartnerSurvey[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SURVEYS);
-      return saved ? JSON.parse(saved) : INITIAL_SURVEYS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_SURVEYS;
+      return [];
     }
   });
 
   const [evaluations, setEvaluations] = useState<PartnerEvaluation[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.EVALUATIONS);
-      return saved ? JSON.parse(saved) : INITIAL_EVALUATIONS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_EVALUATIONS;
+      return [];
     }
   });
 
@@ -133,40 +135,37 @@ export default function App() {
     }, 4000);
   };
 
-  // Real-time Online Cloud Storage Synchronization (Firestore)
+  // Real-time Online Cloud Storage Synchronization (Firestore as Sole Source of Truth)
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Auto-seed cloud collections if database is empty on first run
-    seedDatabaseIfEmpty();
-
-    // 2. Real-time Listeners for instant multi-user cloud synchronization
+    // Real-time Listeners for instant multi-user cloud synchronization
     const unsubUsers = subscribeToUsers((cloudUsers) => {
-      if (isMounted && cloudUsers && cloudUsers.length > 0) {
+      if (isMounted) {
         setUsers(cloudUsers);
       }
     });
 
     const unsubAgreements = subscribeToAgreements((cloudAgreements) => {
-      if (isMounted && cloudAgreements && cloudAgreements.length > 0) {
+      if (isMounted) {
         setAgreements(cloudAgreements);
       }
     });
 
     const unsubExecutions = subscribeToExecutions((cloudExecutions) => {
-      if (isMounted && cloudExecutions && cloudExecutions.length > 0) {
+      if (isMounted) {
         setExecutions(cloudExecutions);
       }
     });
 
     const unsubSurveys = subscribeToSurveys((cloudSurveys) => {
-      if (isMounted && cloudSurveys && cloudSurveys.length > 0) {
+      if (isMounted) {
         setSurveys(cloudSurveys);
       }
     });
 
     const unsubEvaluations = subscribeToEvaluations((cloudEvaluations) => {
-      if (isMounted && cloudEvaluations && cloudEvaluations.length > 0) {
+      if (isMounted) {
         setEvaluations(cloudEvaluations);
       }
     });
@@ -417,31 +416,8 @@ export default function App() {
     showToast(`تم حذف حساب ${target ? target.name : ''} من السحابة بنجاح`);
   };
 
-  const handleSwitchUser = (targetUser: SystemUser) => {
-    const switchedAuthUser: AuthUser = {
-      id: targetUser.id,
-      username: targetUser.username,
-      email: targetUser.email,
-      name: targetUser.name,
-      role: targetUser.role,
-      roleType: targetUser.roleType,
-      department: targetUser.department,
-      initials: targetUser.initials,
-      status: targetUser.status
-    };
-    setCurrentUser(switchedAuthUser);
-    if (targetUser.roleType === 'president_assistant') {
-      setActiveTab('president-dashboard');
-    } else if (targetUser.roleType === 'admin') {
-      setActiveTab('users');
-    } else {
-      setActiveTab('agreements');
-    }
-    showToast(`تم التبديل بنجاح إلى: ${targetUser.name} (${targetUser.role})`);
-  };
-
-  // If user is not authenticated, render Login Page
-  if (!currentUser) {
+  // Protected Route Enforcement: If user is not authenticated or account is disabled, render Login Page ONLY
+  if (!currentUser || currentUser.status === 'معطل') {
     return <LoginPage onLogin={handleLogin} availableUsers={users} />;
   }
 
@@ -498,11 +474,11 @@ export default function App() {
         {isAdmin && (
           <UsersTab
             users={users}
+            agreements={agreements}
             currentUser={currentUser}
             onAddUser={handleAddUser}
             onUpdateUser={handleUpdateUser}
             onDeleteUser={handleDeleteUser}
-            onSwitchUser={handleSwitchUser}
           />
         )}
 

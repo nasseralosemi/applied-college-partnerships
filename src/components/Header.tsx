@@ -10,7 +10,6 @@ interface HeaderProps {
   currentUser?: AuthUser | null;
   onLogout: () => void;
   onOpenUsersTab?: () => void;
-  onSwitchUserPrompt?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 

@@ -129,6 +129,7 @@ export interface SystemUser {
   phone?: string;
   initials: string;
   avatarColor?: string;
+  password?: string;
   lastLogin?: string;
   createdAt: string;
 }

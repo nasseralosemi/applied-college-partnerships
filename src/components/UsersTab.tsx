@@ -19,17 +19,20 @@ import {
   X,
   AlertTriangle,
   BadgeCheck,
-  Crown
+  Crown,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
-import { SystemUser, UserRoleType, AuthUser, AccountStatus } from '../types';
+import { SystemUser, UserRoleType, AuthUser, AccountStatus, Agreement } from '../types';
+import { exportFirebaseBackupToExcel } from '../utils/exportBackup';
 
 interface UsersTabProps {
   users?: SystemUser[];
+  agreements?: Agreement[];
   currentUser?: AuthUser | null;
   onAddUser: (user: SystemUser) => void;
   onUpdateUser?: (user: SystemUser) => void;
   onDeleteUser?: (userId: string) => void;
-  onSwitchUser?: (user: SystemUser) => void;
 }
 
 // Available roles specified in the platform requirements:
@@ -88,11 +91,35 @@ export const ROLE_OPTIONS: {
 
 export const UsersTab: React.FC<UsersTabProps> = ({
   users = [],
+  agreements = [],
   currentUser,
   onAddUser,
   onUpdateUser,
   onDeleteUser
 }) => {
+  // Export Backup State
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportSuccessMessage, setExportSuccessMessage] = useState<string | null>(null);
+
+  // Backup Export Handler
+  const handleExportBackup = async () => {
+    setIsExporting(true);
+    try {
+      const result = await exportFirebaseBackupToExcel(agreements, users);
+      if (result.success) {
+        setExportSuccessMessage(
+          `تم بنجاح تصدير ملف النسخة الاحتياطية للبيانات (Excel) متضمناً ${result.agreementsCount} اتفاقية و ${result.usersCount} حساب مسجل في Firebase`
+        );
+        setTimeout(() => {
+          setExportSuccessMessage(null);
+        }, 6000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
   // Create User Form State
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -120,6 +147,16 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   const [editStatus, setEditStatus] = useState<AccountStatus>('نشط');
   const [editNewPassword, setEditNewPassword] = useState('');
   const [showEditPassword, setShowEditPassword] = useState(false);
+
+  // Track visible passwords in table
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const togglePasswordVisibility = (userId: string) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
+  };
 
   // Deleting User Modal State
   const [userToDelete, setUserToDelete] = useState<SystemUser | null>(null);
@@ -211,6 +248,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         department: selectedRoleConfig.department,
         initials,
         avatarColor: randomColor,
+        password: password.trim(),
         createdAt: new Date().toISOString().split('T')[0],
         lastLogin: 'لم يسجل دخول بعد'
       };
@@ -235,7 +273,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
     setEditUsername(user.username);
     setEditRoleType(user.roleType);
     setEditStatus(user.status || 'نشط');
-    setEditNewPassword('');
+    setEditNewPassword(user.password || '');
     setShowEditPassword(false);
   };
 
@@ -261,7 +299,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       roleType: editRoleType,
       role: roleConfig.roleTitle,
       department: roleConfig.department,
-      status: editStatus
+      status: editStatus,
+      password: editNewPassword.trim() ? editNewPassword.trim() : editingUser.password
     };
 
     onUpdateUser(updated);
@@ -323,6 +362,43 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             )}
           </div>
         </div>
+
+        {/* Dedicated Backup & Data Export Action Bar */}
+        <div className="relative z-10 mt-6 pt-5 border-t border-purple-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 text-xs text-purple-200">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
+            <span>النسخ الاحتياطي السحابي المباشر لقاعدة بيانات Firebase (الاتفاقيات والحسابات المسجلة)</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExportBackup}
+            disabled={isExporting}
+            className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-emerald-950/40 hover:shadow-2xl transition-all cursor-pointer transform active:scale-98 shrink-0 disabled:opacity-60 border border-emerald-400/30"
+            title="تصدير نسخة احتياطية للبيانات (Excel/CSV)"
+          >
+            {isExporting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>جاري تصدير النسخة الاحتياطية...</span>
+              </>
+            ) : (
+              <>
+                <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
+                <span>تصدير نسخة احتياطية للبيانات (Excel/CSV)</span>
+                <Download className="w-4 h-4 text-white" />
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Success Feedback Notification */}
+        {exportSuccessMessage && (
+          <div className="relative z-10 mt-4 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 flex items-center gap-3 text-xs sm:text-sm font-bold animate-in fade-in duration-200">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>{exportSuccessMessage}</span>
+          </div>
+        )}
       </div>
 
       {/* =========================================================================
@@ -571,28 +647,43 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="w-full md:w-80 relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="البحث بالاسم، اسم المستخدم، أو الصلاحية..."
-              className="w-full pr-10 pl-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-100 transition-all"
-            />
-            <div className="absolute top-1/2 -translate-y-1/2 right-3 text-slate-400 pointer-events-none">
-              <Search className="w-4 h-4" />
+          {/* Controls: Search Bar & Backup Export Button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="w-full sm:w-72 relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="البحث بالاسم، اسم المستخدم، أو الصلاحية..."
+                className="w-full pr-10 pl-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-100 transition-all"
+              />
+              <div className="absolute top-1/2 -translate-y-1/2 right-3 text-slate-400 pointer-events-none">
+                <Search className="w-4 h-4" />
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleExportBackup}
+              disabled={isExporting}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-98 disabled:opacity-50"
+              title="تصدير نسخة احتياطية للبيانات (Excel/CSV)"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+              <span>تصدير نسخة احتياطية للبيانات (Excel/CSV)</span>
+              <Download className="w-3.5 h-3.5 text-emerald-600" />
+            </button>
           </div>
         </div>
 
         {/* Responsive Table Container */}
         <div className="overflow-x-auto w-full mt-6 -mx-2 sm:mx-0">
-          <table className="w-full text-right text-xs sm:text-sm border-collapse min-w-[650px]">
+          <table className="w-full text-right text-xs sm:text-sm border-collapse min-w-[760px]">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-[11px] font-black uppercase tracking-wider border-b border-slate-200">
                 <th className="py-3 px-4 rounded-r-xl">المستخدم</th>
                 <th className="py-3 px-4">اسم المستخدم / البريد</th>
+                <th className="py-3 px-4">كلمة المرور (Password)</th>
                 <th className="py-3 px-4">الصلاحية / الدور</th>
                 <th className="py-3 px-4">الحالة</th>
                 <th className="py-3 px-4">تاريخ الإنشاء</th>
@@ -602,7 +693,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
                     <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                     <p className="text-sm font-bold text-slate-600">لا توجد حسابات مطابقة للبحث</p>
                     <p className="text-xs text-slate-400 mt-1">جرّب تغيير كلمات البحث أو أضف حساباً جديداً أعلاه</p>
@@ -649,6 +740,28 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       <td className="py-3.5 px-4 font-mono text-xs">
                         <div className="font-bold text-slate-800" dir="ltr">{u.username}</div>
                         <div className="text-[11px] text-slate-400" dir="ltr">{u.email}</div>
+                      </td>
+
+                      {/* Password Column with Secure Show/Hide Toggle */}
+                      <td className="py-3.5 px-4 font-mono text-xs">
+                        <div className="inline-flex items-center gap-2 bg-slate-100/90 hover:bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200 transition-colors">
+                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="font-mono text-slate-800 font-bold tracking-wider text-xs select-all min-w-[65px]" dir="ltr">
+                            {visiblePasswords[u.id] ? (u.password || '••••••••') : '••••••••'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility(u.id)}
+                            className="p-1 text-slate-400 hover:text-purple-700 transition-colors cursor-pointer rounded-md hover:bg-white"
+                            title={visiblePasswords[u.id] ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                          >
+                            {visiblePasswords[u.id] ? (
+                              <EyeOff className="w-3.5 h-3.5 text-purple-700" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </td>
 
                       {/* Role Badge */}
@@ -826,24 +939,29 @@ export const UsersTab: React.FC<UsersTabProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  تعيين كلمة مرور جديدة (اختياري)
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>كلمة المرور (Password)</span>
+                  <span className="text-[11px] text-slate-400 font-normal">عرض أو تعديل كلمة المرور</span>
                 </label>
                 <div className="relative">
                   <input
                     type={showEditPassword ? 'text' : 'password'}
                     value={editNewPassword}
                     onChange={(e) => setEditNewPassword(e.target.value)}
-                    placeholder="اترك الحقل فارغاً للإبقاء على كلمة المرور السابقة"
+                    placeholder="أدخل كلمة المرور أو اتركها كما هي"
                     dir="ltr"
-                    className="w-full px-4 py-2.5 pl-10 rounded-xl bg-slate-50 border border-slate-300 text-sm text-left focus:outline-none focus:border-purple-600"
+                    className="w-full px-4 py-2.5 pl-10 pr-10 rounded-xl bg-slate-50 border border-slate-300 text-sm text-left focus:outline-none focus:border-purple-600 font-mono"
                   />
+                  <div className="absolute top-1/2 -translate-y-1/2 right-3.5 text-slate-400 pointer-events-none">
+                    <Lock className="w-4 h-4" />
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowEditPassword(!showEditPassword)}
-                    className="absolute top-1/2 -translate-y-1/2 left-3 text-slate-400 hover:text-slate-600 p-1"
+                    className="absolute top-1/2 -translate-y-1/2 left-3 text-slate-400 hover:text-purple-600 p-1 cursor-pointer transition-colors"
+                    title={showEditPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
                   >
-                    {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showEditPassword ? <EyeOff className="w-4 h-4 text-purple-600" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>

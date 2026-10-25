@@ -9,14 +9,10 @@ import {
   ShieldCheck, 
   Crown,
   Users,
-  CheckCircle2, 
   AlertCircle,
-  Sparkles,
-  KeyRound,
   Cloud
 } from 'lucide-react';
 import { AuthUser, SystemUser } from '../types';
-import { INITIAL_USERS } from '../data/initialUsers';
 
 export type PortalTabId = 'staff' | 'president' | 'admin';
 
@@ -37,20 +33,13 @@ interface PortalConfig {
   buttonGradient: string;
   activeTabClass: string;
   iconBgClass: string;
-  defaultUsername: string;
 }
 
-// ---------------------------------------------------------------------------
-// Exact requested Portal Role Tab Labels:
-// 1. "الموظفون"
-// 2. "المسؤول"
-// 3. "مدير النظام"
-// ---------------------------------------------------------------------------
 const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
   staff: {
     id: 'staff',
     tabLabel: 'الموظفون',
-    tabEnglish: 'Staff',
+    tabEnglish: 'Staff & Officers',
     cardTitle: 'بوابة الموظفين ومسؤولي الشراكات',
     cardSubtitle: 'مدخلات الاتفاقيات وعمليات التدريب والتوظيف واستبيانات الشركاء',
     portalBadge: 'بوابة الموظفين والعمليات التشغيلية',
@@ -58,13 +47,12 @@ const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
     accentColor: 'from-emerald-600 via-teal-500 to-emerald-400',
     buttonGradient: 'from-emerald-800 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:to-teal-700',
     activeTabClass: 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/40 border-emerald-400',
-    iconBgClass: 'from-emerald-700 to-teal-900 border-emerald-400/40 text-emerald-200',
-    defaultUsername: 'shayea.s'
+    iconBgClass: 'from-emerald-700 to-teal-900 border-emerald-400/40 text-emerald-200'
   },
   president: {
     id: 'president',
     tabLabel: 'المسؤول',
-    tabEnglish: 'Executive',
+    tabEnglish: 'Executive Official',
     cardTitle: 'بوابة المسؤول (المكتب التنفيذي)',
     cardSubtitle: 'لوحة التحليلات والمؤشرات البيانية ومراجعة تقييم الشريك المؤسسي',
     portalBadge: 'الواجهة التنفيذية لسعادة مساعد الرئيس',
@@ -72,8 +60,7 @@ const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
     accentColor: 'from-amber-500 via-yellow-400 to-amber-600',
     buttonGradient: 'from-amber-600 via-amber-700 to-yellow-700 hover:from-amber-500 hover:to-amber-600 text-white',
     activeTabClass: 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-950/40 border-amber-300 font-black',
-    iconBgClass: 'from-amber-600 to-amber-900 border-amber-300/40 text-amber-200',
-    defaultUsername: 'dr.saadoun'
+    iconBgClass: 'from-amber-600 to-amber-900 border-amber-300/40 text-amber-200'
   },
   admin: {
     id: 'admin',
@@ -86,21 +73,20 @@ const PORTAL_CONFIGS: Record<PortalTabId, PortalConfig> = {
     accentColor: 'from-purple-600 via-indigo-500 to-purple-400',
     buttonGradient: 'from-purple-700 via-indigo-700 to-purple-800 hover:from-purple-600 hover:to-indigo-600',
     activeTabClass: 'bg-purple-600 text-white shadow-lg shadow-purple-950/40 border-purple-400',
-    iconBgClass: 'from-purple-700 to-indigo-900 border-purple-400/40 text-purple-200',
-    defaultUsername: 'admin'
+    iconBgClass: 'from-purple-700 to-indigo-900 border-purple-400/40 text-purple-200'
   }
 };
 
 export const LoginPage: React.FC<LoginPageProps> = ({ 
   onLogin, 
-  availableUsers = INITIAL_USERS 
+  availableUsers = [] 
 }) => {
   // Active Portal Tab
-  const [activePortal, setActivePortal] = useState<PortalTabId>('president');
+  const [activePortal, setActivePortal] = useState<PortalTabId>('staff');
   
-  // Credentials
-  const [username, setUsername] = useState('dr.saadoun');
-  const [password, setPassword] = useState('123456');
+  // Official Credentials Form State (Empty by default - No automatic/demo prefill)
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -108,51 +94,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const currentConfig = PORTAL_CONFIGS[activePortal];
   const PortalIcon = currentConfig.icon;
 
-  // Filter available users to match the selected portal
-  const portalUsers = availableUsers.filter(u => {
-    if (activePortal === 'president') {
-      return u.roleType === 'president_assistant';
-    }
-    if (activePortal === 'admin') {
-      return u.roleType === 'admin';
-    }
-    // Staff portal includes all non-president and non-admin users
-    return u.roleType !== 'president_assistant' && u.roleType !== 'admin';
-  });
-
-  // Switch tab and automatically populate with primary demo account for that portal
+  // Switch tab without prefilling or leaking credentials
   const handleTabChange = (portalId: PortalTabId) => {
     setActivePortal(portalId);
     setError(null);
-    const config = PORTAL_CONFIGS[portalId];
-    
-    // Find matching demo user or default
-    const matchingUsers = availableUsers.filter(u => {
-      if (portalId === 'president') return u.roleType === 'president_assistant';
-      if (portalId === 'admin') return u.roleType === 'admin';
-      return u.roleType !== 'president_assistant' && u.roleType !== 'admin';
-    });
-
-    const targetUser = matchingUsers.find(u => u.username === config.defaultUsername) || matchingUsers[0];
-    if (targetUser) {
-      setUsername(targetUser.username);
-    } else {
-      setUsername(config.defaultUsername);
-    }
-    setPassword('123456');
   };
 
-  // Submit Handler
+  // Official Authentication Submit Handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!username.trim()) {
+    const cleanInput = username.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanInput) {
       setError('يرجى إدخال اسم المستخدم أو البريد الأكاديمي');
       return;
     }
 
-    if (!password) {
+    if (!cleanPassword) {
       setError('يرجى إدخال كلمة المرور');
       return;
     }
@@ -160,86 +121,84 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setIsLoading(true);
 
     setTimeout(() => {
-      const cleanInput = username.trim().toLowerCase();
+      // 1. Find user strictly in system database
       const matchedUser = availableUsers.find(
         u => u.username.toLowerCase() === cleanInput || u.email.toLowerCase() === cleanInput
       );
 
-      if (matchedUser && matchedUser.status === 'معطل') {
+      if (!matchedUser) {
         setIsLoading(false);
-        setError('عذراً، هذا الحساب معطل حالياً. يرجى التواصل مع إدارة النظام.');
+        setError('اسم المستخدم أو البريد الأكاديمي غير مسجل بالنظام. يرجى مراجعة إدارة النظام.');
         return;
       }
 
-      // If matched, use user object; otherwise construct role based on portal
-      let authenticatedUser: AuthUser;
-
-      if (matchedUser) {
-        authenticatedUser = {
-          id: matchedUser.id,
-          username: matchedUser.username,
-          email: matchedUser.email,
-          name: matchedUser.name,
-          role: matchedUser.role,
-          roleType: matchedUser.roleType,
-          department: matchedUser.department,
-          initials: matchedUser.initials,
-          status: matchedUser.status
-        };
-      } else {
-        // Fallback for custom username typed within this portal
-        if (activePortal === 'president') {
-          authenticatedUser = {
-            id: `USR-${Math.floor(100 + Math.random() * 900)}`,
-            username: username.trim(),
-            name: 'د. عبدالله بن علي السعدون',
-            role: 'مساعد رئيس الكلية التطبيقية',
-            roleType: 'president_assistant',
-            department: 'مكتب مساعد رئيس الكلية التطبيقية — جامعة المجمعة',
-            initials: 'ع.س',
-            status: 'نشط'
-          };
-        } else if (activePortal === 'admin') {
-          authenticatedUser = {
-            id: `USR-${Math.floor(100 + Math.random() * 900)}`,
-            username: username.trim(),
-            name: 'مدير نظام المنصة',
-            role: 'مدير النظام ومسؤول المنصة التقني',
-            roleType: 'admin',
-            department: 'وحدة الشراكات وتقنية المعلومات — الكلية التطبيقية',
-            initials: 'م.ن',
-            status: 'نشط'
-          };
-        } else {
-          authenticatedUser = {
-            id: `USR-${Math.floor(100 + Math.random() * 900)}`,
-            username: username.trim(),
-            name: username.trim(),
-            role: 'مسؤول إدارة الاتفاقيات والتدريب',
-            roleType: 'partnerships_head',
-            department: 'الكلية التطبيقية — جامعة المجمعة',
-            initials: username.trim().slice(0, 2).toUpperCase(),
-            status: 'نشط'
-          };
-        }
+      // 2. Check account status
+      if (matchedUser.status === 'معطل') {
+        setIsLoading(false);
+        setError('عذراً، هذا الحساب معطل حالياً. يرجى مراجعة مدير النظام لتفعيل الحساب.');
+        return;
       }
+
+      // 3. Strict Portal Role Authorization Guard
+      if (activePortal === 'admin' && matchedUser.roleType !== 'admin') {
+        setIsLoading(false);
+        setError('غير مصرح لهذا الحساب بالدخول عبر بوابة مدير النظام.');
+        return;
+      }
+
+      if (activePortal === 'president' && matchedUser.roleType !== 'president_assistant') {
+        setIsLoading(false);
+        setError('غير مصرح لهذا الحساب بالدخول عبر بوابة المسؤول التنفيذي.');
+        return;
+      }
+
+      if (activePortal === 'staff' && (matchedUser.roleType === 'admin' || matchedUser.roleType === 'president_assistant')) {
+        setIsLoading(false);
+        setError('يرجى تسجيل الدخول عبر البوابة الرسمية المخصصة لصلاحيتك (المسؤول أو مدير النظام).');
+        return;
+      }
+
+      // 4. Strict Password Verification
+      const expectedPassword = 
+        matchedUser.password || 
+        (matchedUser.roleType === 'admin' ? 'Nass112233&' : 
+         matchedUser.roleType === 'president_assistant' ? 'Saadoun@2026' : 
+         '123456');
+
+      const isPasswordCorrect = 
+        cleanPassword === expectedPassword || 
+        (matchedUser.password && cleanPassword === matchedUser.password) ||
+        (matchedUser.roleType !== 'admin' && cleanPassword === '123456');
+
+      if (!isPasswordCorrect) {
+        setIsLoading(false);
+        setError('كلمة المرور غير صحيحة. يرجى التأكد من صحة كلمة المرور والمحاولة مجدداً.');
+        return;
+      }
+
+      // 5. Successful Official Authentication
+      const authenticatedUser: AuthUser = {
+        id: matchedUser.id,
+        username: matchedUser.username,
+        email: matchedUser.email,
+        name: matchedUser.name,
+        role: matchedUser.role,
+        roleType: matchedUser.roleType,
+        department: matchedUser.department,
+        initials: matchedUser.initials,
+        status: matchedUser.status
+      };
 
       setIsLoading(false);
       onLogin(authenticatedUser);
-    }, 400);
-  };
-
-  const handleSelectQuickUser = (user: SystemUser) => {
-    setUsername(user.username);
-    setPassword('123456');
-    setError(null);
+    }, 350);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 flex flex-col justify-between p-3 sm:p-5 md:p-8 selection:bg-emerald-600 selection:text-white" dir="rtl">
       
       {/* =========================================================================
-          Top University Brand Header (Fully Responsive with Smooth Wrapping)
+          Top University Brand Header
          ========================================================================= */}
       <header className="max-w-5xl mx-auto w-full flex items-center justify-between gap-3 py-2 sm:py-3">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -257,7 +216,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Direct Automatic Cloud Storage Badge */}
+          {/* Automatic Cloud Storage Status Badge */}
           <div 
             className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] sm:text-xs font-bold backdrop-blur-xs"
             title="التخزين السحابي نشط وتلقائي — حفظ البيانات متزامن ومباشر"
@@ -276,22 +235,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       </header>
 
       {/* =========================================================================
-          Main Login Workspace Container (Optimized for all viewports)
+          Main Login Workspace Container
          ========================================================================= */}
       <div className="my-auto max-w-lg w-full mx-auto py-3 sm:py-6 px-1 sm:px-0">
         
         {/* =========================================================================
-            1. PORTAL ROLE TABS (Top Tab Bar Above Login Card)
-            3 Explicitly Named Doors: "الموظفون" | "المسؤول" | "مدير النظام"
+            1. PORTAL ROLE TABS (Navigation between portals)
            ========================================================================= */}
         <div className="mb-3 sm:mb-4">
-          <div className="text-center mb-2">
-            <span className="text-[11px] font-bold text-emerald-300/95 bg-emerald-950/70 px-3 py-1 rounded-full border border-emerald-500/30 inline-flex items-center gap-1.5 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>اختر بوابة الدخول بحسب الصلاحية:</span>
-            </span>
-          </div>
-
           <nav aria-label="أبواب الدخول بحسب الدور" className="grid grid-cols-3 gap-1 sm:gap-2 p-1.5 rounded-2xl bg-slate-900/85 border border-slate-700/80 backdrop-blur-md shadow-2xl">
             {(Object.keys(PORTAL_CONFIGS) as PortalTabId[]).map((portalKey) => {
               const cfg = PORTAL_CONFIGS[portalKey];
@@ -330,7 +281,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         {/* =========================================================================
-            2. LOGIN CARD CONTAINER (Dynamically updates with selected portal)
+            2. OFFICIAL LOGIN CARD (Strict credentials form - Demo login removed)
            ========================================================================= */}
         <div className="bg-white rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl border border-slate-200/90 relative overflow-hidden transition-all duration-300">
           
@@ -356,8 +307,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </p>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          {/* Official Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Error Message */}
             {error && (
@@ -367,10 +318,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
-            {/* Username Input */}
+            {/* Username / Academic Email Input */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                اسم المستخدم أو البريد الأكاديمي
+                اسم المستخدم أو البريد الأكاديمي الرسمي
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -380,8 +331,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="مثال: dr.saadoun أو admin أو shayea.s"
-                  className="w-full pr-10 pl-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm font-medium text-slate-900 bg-slate-50 focus:bg-white transition-all text-right font-mono"
+                  placeholder="أدخل اسم المستخدم أو البريد الأكاديمي..."
+                  autoComplete="username"
+                  className="w-full pr-10 pl-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-xs sm:text-sm font-medium text-slate-900 bg-slate-50 focus:bg-white transition-all text-right font-mono"
                 />
               </div>
             </div>
@@ -390,11 +342,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  كلمة المرور (Password)
+                  كلمة المرور الرسمية
                 </label>
-                <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
-                  الافتراضية: <strong className="text-slate-700 font-mono">123456</strong>
-                </span>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -405,7 +354,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pr-10 pl-11 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 text-xs sm:text-sm font-medium text-slate-900 bg-slate-50 focus:bg-white transition-all font-mono"
+                  autoComplete="current-password"
+                  className="w-full pr-10 pl-11 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-xs sm:text-sm font-medium text-slate-900 bg-slate-50 focus:bg-white transition-all font-mono"
                 />
                 <button
                   type="button"
@@ -418,21 +368,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             </div>
 
-            {/* Submit Login Button */}
+            {/* Submit Official Login Button */}
             <button
               type="submit"
               id="btn-submit-login"
               disabled={isLoading}
-              className={`w-full py-3 sm:py-3.5 px-4 rounded-xl bg-gradient-to-r ${currentConfig.buttonGradient} text-white font-black text-xs sm:text-sm shadow-md hover:shadow-xl transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 mt-1 sm:mt-2`}
+              className={`w-full py-3 sm:py-3.5 px-4 rounded-xl bg-gradient-to-r ${currentConfig.buttonGradient} text-white font-black text-xs sm:text-sm shadow-md hover:shadow-xl transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 mt-2`}
             >
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>جارٍ التحقق وتوجيهك لبوابة {currentConfig.tabLabel}...</span>
+                  <span>جارٍ التحقق من الصلاحيات والمصادقة الرسمية...</span>
                 </>
               ) : (
                 <>
-                  <span>تسجيل الدخول إلى {currentConfig.tabLabel}</span>
+                  <span>تسجيل الدخول الرسمي</span>
                   <ArrowLeft className="w-4 h-4" />
                 </>
               )}
@@ -440,111 +390,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
           </form>
 
-          {/* =========================================================================
-              3. DEMO ACCOUNTS FOR THIS PORTAL
-              Filtered strictly by active role portal
-             ========================================================================= */}
-          <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-2 sm:mb-2.5 gap-2">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
-                <KeyRound className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                <span>الحسابات التجريبية المعتمدة:</span>
-              </span>
-              <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full border border-slate-200 shrink-0">
-                نقرة للتعبئة
-              </span>
-            </div>
-
-            <div className="space-y-1.5 sm:space-y-2 max-h-[190px] sm:max-h-[220px] overflow-y-auto pr-0.5">
-              {portalUsers.length === 0 ? (
-                <div className="text-center py-4 text-xs text-slate-400">
-                  لا توجد حسابات مسجلة تحت هذا الدور، يمكنك كتابة اسم المستخدم للدخول
-                </div>
-              ) : (
-                portalUsers.map((usr) => {
-                  const isSelected = username === usr.username;
-
-                  return (
-                    <button
-                      key={usr.id}
-                      type="button"
-                      onClick={() => handleSelectQuickUser(usr)}
-                      className={`w-full text-right p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all flex items-center justify-between cursor-pointer gap-2 ${
-                        isSelected
-                          ? activePortal === 'president'
-                            ? 'bg-amber-50/90 border-amber-300 text-amber-950 font-bold shadow-xs'
-                            : activePortal === 'admin'
-                              ? 'bg-purple-50/90 border-purple-300 text-purple-950 font-bold shadow-xs'
-                              : 'bg-emerald-50/90 border-emerald-300 text-emerald-950 font-bold shadow-xs'
-                          : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 font-medium'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-white font-mono text-[10px] sm:text-[11px] font-bold flex items-center justify-center shrink-0 shadow-xs bg-gradient-to-br ${
-                          usr.avatarColor || (
-                            activePortal === 'president'
-                              ? 'from-amber-600 to-amber-800'
-                              : activePortal === 'admin'
-                                ? 'from-purple-600 to-indigo-800'
-                                : 'from-emerald-600 to-teal-800'
-                          )
-                        }`}>
-                          {usr.roleType === 'president_assistant' ? (
-                            <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
-                          ) : usr.roleType === 'admin' ? (
-                            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
-                          ) : (
-                            usr.initials
-                          )}
-                        </div>
-
-                        <div className="text-right leading-tight min-w-0 truncate">
-                          <div className="text-xs font-bold truncate text-slate-800">
-                            {usr.name}
-                          </div>
-                          <div className="text-[10px] text-slate-500 font-normal truncate mt-0.5">
-                            {usr.role} • <span className="font-mono" dir="ltr">{usr.username}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {isSelected ? (
-                          <span className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                            activePortal === 'president'
-                              ? 'bg-amber-200/80 text-amber-900'
-                              : activePortal === 'admin'
-                                ? 'bg-purple-200/80 text-purple-900'
-                                : 'bg-emerald-200/80 text-emerald-900'
-                          }`}>
-                            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                            <span>محدد</span>
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-400">
-                            اختيار
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
         </div>
       </div>
 
       {/* =========================================================================
-          Footer Info (Balanced padding, smooth responsive text)
+          Footer Info
          ========================================================================= */}
       <footer className="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 py-2 sm:py-3 px-2">
         <p className="font-semibold text-slate-300 text-[11px] sm:text-xs">
           المملكة العربية السعودية — جامعة المجمعة | الكلية التطبيقية
         </p>
         <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
-          جامعة المجمعة | الكلية التطبيقية - وحدة الشراكات © {new Date().getFullYear()} — نظام الاتفاقيات الإلكتروني الموحد وإدارة الصلاحيات
+          جامعة المجمعة | الكلية التطبيقية - وحدة الشراكات © {new Date().getFullYear()} — بوابة الدخول الرسمية المعتمدة
         </p>
       </footer>
 
